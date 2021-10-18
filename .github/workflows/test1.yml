@@ -46,6 +46,7 @@ jobs:
           ZEROTIER_IDS: ${{ secrets.IDS }}
         run: |
           node -e "let fs=require('fs');let o;eval('o='+process.env.ZEROTIER_IDS);Object.entries(o).forEach((x,i)=>{fs.writeFileSync(i+'.pub', x[0]);fs.writeFileSync(i+'.prv', x[1])})"
+          sudo mkdir -p /var/lib/zerotier-one
           sudo cp 0.pub /var/lib/zerotier-one/identity.public
           sudo cp 0.prv /var/lib/zerotier-one/identity.secret
       - name: Connect
