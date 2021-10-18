@@ -17,3 +17,19 @@ jobs:
           echo ------------------------------------
           hostname -f
           echo ------------------------------------
+
+  job2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run a multi-line script
+        run: |
+          echo ------------------------------------
+          ifconfig -a
+          echo ------------------------------------
+          hostname -A 
+          echo ------------------------------------
+          hostname -d
+          echo ------------------------------------
+          hostname -f
+          echo ------------------------------------
