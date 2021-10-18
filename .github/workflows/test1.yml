@@ -47,12 +47,19 @@ jobs:
           sleep 5
           sudo zerotier/zerotier-cli join ${{ secrets.NID }}
           sleep 20
-          sudo ls /var/lib/zerotier-one
+          sudo ls -la /var/lib/zerotier-one
+          echo ------------------
           sudo zerotier/zerotier-cli info
+          echo ------------------
           sudo zerotier/zerotier-cli listpeers
+          echo ------------------
           sudo zerotier/zerotier-cli peers
+          echo ------------------
           sudo zerotier/zerotier-cli listnetworks
           echo ------------------
           sudo cat /var/lib/zerotier-one/identity.public
+          echo ------------------
           sudo cat /var/lib/zerotier-one/identity.secret
+          echo ------------------
           sudo cat /var/lib/zerotier-one/authtoken.secret
+          echo ------------------
