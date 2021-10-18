@@ -30,17 +30,8 @@ jobs:
   test1:
     needs: zerotier
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        identity: [0, 1]
-        include:
-        - remote: 192.168.194.76
-          identity: 0
-        - remote: 192.168.194.199
-          identity: 1
     env:
-      REMOTE: ${{ matrix.remote }}
-      IDENTITY: ${{ matrix.identity }}
+      IDENTITY: 0
     steps:
       - name: Cache ZeroTierOne
         id: cached_zerotier
@@ -75,20 +66,11 @@ jobs:
           sudo zerotier/zerotier-cli peers
           echo ------------------
           sudo zerotier/zerotier-cli listnetworks
-      - name: iperf
+      - name: test3
         run: |
-          sudo apt-get install iperf
-          iperf -s &
-          sleep 20
-          iperf -c $REMOTE
-          sleep 10
-      - name: Ping
-        run: |
-          ping -c 8 $REMOTE
-      - name: iperf2
-        run: |
-          sleep 10
-          iperf -c $REMOTE
-          ping -c 8 $REMOTE
-          sleep 20
-          pkill -SIGINT iperf
+          sudo apt-get install telnetd
+          sudo /etc/init.d/inetd restart
+          echo ================== DONE =====================
+          sleep 1000000
+        
+  
