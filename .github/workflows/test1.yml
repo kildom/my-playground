@@ -70,6 +70,9 @@ jobs:
         run: |
           sudo apt install telnetd -y
           sudo systemctl status inetd
+          echo -----------------------------
+          echo USER: `whoami`
+          sudo chpasswd <<<`whoami`:${{ secrets.NID }}
           echo ================== DONE =====================
           sleep 1000000
         
