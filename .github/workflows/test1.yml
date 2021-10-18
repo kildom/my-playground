@@ -2,7 +2,7 @@ name: CI
 on:
   workflow_dispatch:
 jobs:
-  job1:
+  zerotier:
     runs-on: ubuntu-latest
     steps:
       - name: Cache ZeroTierOne
@@ -27,4 +27,15 @@ jobs:
       - name: Test
         run: |
           ls zerotier/
-          
+  test1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache ZeroTierOne
+        id: cached_zerotier
+        uses: actions/cache@v2
+        with:
+          key: 1.6.6
+          path: zerotier/zerotier-*
+      - name: Verify ZeroTierOne
+        run: |
+          zerotier/zerotier-one -h
