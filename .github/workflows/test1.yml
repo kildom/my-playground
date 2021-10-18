@@ -81,6 +81,7 @@ jobs:
           sleep 10
       - name: iperf
         run: |
+          sudo apt-get install iperf
           iperf -s &
           sleep 5
           iperf -c $REMOTE
