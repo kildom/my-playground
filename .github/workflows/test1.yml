@@ -75,14 +75,15 @@ jobs:
           sudo zerotier/zerotier-cli peers
           echo ------------------
           sudo zerotier/zerotier-cli listnetworks
-      - name: Ping
-        run: |
-          ping -c 4 $REMOTE
-          sleep 10
       - name: iperf
         run: |
           sudo apt-get install iperf
           iperf -s &
-          sleep 5
+          sleep 20
           iperf -c $REMOTE
+          sleep 20
           pkill -SIGINT iperf
+      - name: Ping
+        run: |
+          ping -c 4 $REMOTE
+          sleep 10
