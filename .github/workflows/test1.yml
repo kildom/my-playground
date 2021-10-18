@@ -5,14 +5,26 @@ jobs:
   job1:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Cache ZeroTierOne
+        id: cached_zerotier
+        uses: actions/cache@v2
+        with:
+          key: 1.6.6
+          path: zerotier/zerotier-*
+      - name: Checkout ZeroTierOne
+        if: steps.cached_zerotier.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
         with:
           repository: zerotier/ZeroTierOne
           ref: 1.6.6
           path: zerotier
-      - name: Run a multi-line script
+      - name: Build ZeroTierOne
+        if: steps.cached_zerotier.outputs.cache-hit != 'true'
         run: |
           nproc
           cd zerotier
           make -j`nproc`
+      - name: Test
+        run: |
+          ls zerotier/
           
