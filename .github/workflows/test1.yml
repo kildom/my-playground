@@ -41,6 +41,13 @@ jobs:
         run: |
           zerotier/zerotier-one -h
           zerotier/zerotier-cli -h
+      - name: Set Identity
+        env:
+          ZEROTIER_IDS: ${{ secrets.IDS }}
+        run: |
+          node -e "let fs=require('fs');let o;eval('o='+process.env.ZEROTIER_IDS);Object.entries(o).forEach((x,i)=>{fs.writeFileSync(i+'.pub', x[0]);fs.writeFileSync(i+'.prv', x[1])})"
+          sudo cp 0.pub /var/lib/zerotier-one/identity.public
+          sudo cp 0.prv /var/lib/zerotier-one/identity.secret
       - name: Connect
         run: |
           sudo zerotier/zerotier-one -d
@@ -56,10 +63,3 @@ jobs:
           sudo zerotier/zerotier-cli peers
           echo ------------------
           sudo zerotier/zerotier-cli listnetworks
-          echo ------------------
-          sudo cat /var/lib/zerotier-one/identity.public
-          echo ------------------
-          sudo cat /var/lib/zerotier-one/identity.secret
-          echo ------------------
-          sudo cat /var/lib/zerotier-one/authtoken.secret
-          echo ------------------
