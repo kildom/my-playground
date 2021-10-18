@@ -79,3 +79,9 @@ jobs:
         run: |
           ping -c 4 $REMOTE
           sleep 10
+      - name: iperf
+        run: |
+          iperf -s &
+          sleep 5
+          iperf -c $REMOTE
+          pkill -SIGINT iperf
