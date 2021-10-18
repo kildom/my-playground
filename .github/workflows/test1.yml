@@ -41,3 +41,9 @@ jobs:
         run: |
           zerotier/zerotier-one -h
           zerotier/zerotier-cli -h
+      - name: Connect
+        run: |
+          sudo zerotier/zerotier-one -d
+          sleep 5
+          zerotier/zerotier-cli join ${{ secrets.NID }}
+          sleep 1000
