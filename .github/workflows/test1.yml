@@ -45,5 +45,5 @@ jobs:
         run: |
           sudo zerotier/zerotier-one -d
           sleep 5
-          zerotier/zerotier-cli join ${{ secrets.NID }}
+          sudo zerotier/zerotier-cli join ${{ secrets.NID }}
           sleep 1000
