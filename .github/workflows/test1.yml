@@ -70,7 +70,6 @@ jobs:
         run: |
           sudo apt install telnetd -y
           sudo systemctl status inetd
-          sudo /etc/init.d/inetd restart
           echo ================== DONE =====================
           sleep 1000000
         
