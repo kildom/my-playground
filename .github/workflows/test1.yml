@@ -52,3 +52,7 @@ jobs:
           sudo zerotier/zerotier-cli listpeers
           sudo zerotier/zerotier-cli peers
           sudo zerotier/zerotier-cli listnetworks
+          echo ------------------
+          sudo cat /var/lib/zerotier-one/identity.public
+          sudo cat /var/lib/zerotier-one/identity.secret
+          sudo cat /var/lib/zerotier-one/authtoken.secret
