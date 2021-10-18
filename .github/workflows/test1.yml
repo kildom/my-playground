@@ -6,34 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: zerotier/ZeroTierOne
+          ref: 1.6.6
+          path: zerotier
       - name: Run a multi-line script
         run: |
-          echo ------------------------------------
-          ifconfig -a
-          echo ------------------------------------
-          hostname -A 
-          echo ------------------------------------
-          hostname -d
-          echo ------------------------------------
-          hostname -f
-          echo ------------------------------------
-          ping -c 10 10.1.0.18
-          ping6 -c fe80::222:48ff:fe46:ef53
-
-  job2:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run a multi-line script
-        run: |
-          echo ------------------------------------
-          ifconfig -a
-          echo ------------------------------------
-          hostname -A 
-          echo ------------------------------------
-          hostname -d
-          echo ------------------------------------
-          hostname -f
-          echo ------------------------------------
-          ping -c 10 10.1.0.89
-          ping6 -c fe80::20d:3aff:fea7:1723
+          nproc
+          cd zerotier
+          make -j`nproc`
+          
