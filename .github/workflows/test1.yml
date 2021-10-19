@@ -49,6 +49,7 @@ jobs:
     env:
       IDENTITY: 0
     steps:
+      - uses: actions/checkout@v2
       - name: Cache ZeroTierOne
         uses: actions/cache@v2
         with:
@@ -62,7 +63,7 @@ jobs:
       - name: ZeroTierOne IDS
         run: |
           chmod 777 ids_gen.sh
-          echo ./ids_gen.sh
+          ./ids_gen.sh
       - name: ZeroTierOne Connect
         run: |
           sudo cp IDS/0.pub /var/lib/zerotier-one/identity.public
