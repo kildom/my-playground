@@ -39,6 +39,7 @@ jobs:
       - name: Download and compile distcc
         if: steps.cached_distcc.outputs.cache-hit != 'true'
         run: |
+          sudo apt-get install -y libiberty-dev
           mkdir distcc
           cd distcc
           wget https://github.com/distcc/distcc/releases/download/v3.4/distcc-3.4.tar.gz
