@@ -4,8 +4,8 @@ set -e
 
 mkdir -p IDS
 
-for i in {0..19}; do 
-    if [ -e IDS/$i.prv ]; then
+for i in {0..17}; do 
+	if [ -e IDS/$i.prv ]; then
 		continue
 	fi
 	sudo zerotier/zerotier-one -d
