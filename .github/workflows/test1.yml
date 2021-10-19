@@ -66,8 +66,8 @@ jobs:
           ./ids_gen.sh
       - name: ZeroTierOne Connect
         run: |
-          sudo cp IDS/0.pub /var/lib/zerotier-one/identity.public
-          sudo cp IDS/0.prv /var/lib/zerotier-one/identity.secret
+          sudo cp IDS/2.pub /var/lib/zerotier-one/identity.public
+          sudo cp IDS/2.prv /var/lib/zerotier-one/identity.secret
           sudo zerotier/zerotier-one -d
           sleep 3
           sudo zerotier/zerotier-cli join ${{ secrets.NID }}
