@@ -27,8 +27,31 @@ jobs:
       - name: Test
         run: |
           ls zerotier/
+  distcc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache distcc
+        id: cached_distcc
+        uses: actions/cache@v2
+        with:
+          key: distcc v3.4
+          path: distcc/dist
+      - name: Download and compile distcc
+        if: steps.cached_distcc.outputs.cache-hit != 'true'
+        run: |
+          mkdir distcc
+          cd distcc
+          wget https://github.com/distcc/distcc/releases/download/v3.4/distcc-3.4.tar.gz
+          tar -xvf distcc-3.4.tar.gz --strip 1
+          ./configure --prefix `pwd`/dist
+          make -j`nproc`
+          make install
+      - name: Test
+        run: |
+          ls distcc/dist/bin
   test1:
-    needs: zerotier
+    if: false
+    needs: [zerotier, distcc]
     runs-on: ubuntu-latest
     env:
       IDENTITY: 0
