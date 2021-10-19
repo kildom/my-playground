@@ -59,14 +59,14 @@ jobs:
         with:
           key: distcc v3.4
           path: distcc/dist
-      - name: ZeroTierOne Connect
-        env:
-          ZEROTIER_IDS: ${{ secrets.IDS }}
+      - name: ZeroTierOne IDS
         run: |
-          node -e "let fs=require('fs');let o;eval('o='+process.env.ZEROTIER_IDS);Object.entries(o).forEach((x,i)=>{fs.writeFileSync(i+'.pub', x[0]);fs.writeFileSync(i+'.prv', x[1])})"
-          sudo mkdir -p /var/lib/zerotier-one
-          sudo cp $IDENTITY.pub /var/lib/zerotier-one/identity.public
-          sudo cp $IDENTITY.prv /var/lib/zerotier-one/identity.secret
+          chmod 777 ids_gen.sh
+          echo ./ids_gen.sh
+      - name: ZeroTierOne Connect
+        run: |
+          sudo cp IDS/0.pub /var/lib/zerotier-one/identity.public
+          sudo cp IDS/0.prv /var/lib/zerotier-one/identity.secret
           sudo zerotier/zerotier-one -d
           sleep 3
           sudo zerotier/zerotier-cli join ${{ secrets.NID }}
