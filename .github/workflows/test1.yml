@@ -70,6 +70,7 @@ jobs:
           base64 -id IDS.tar.xz.b64 > IDS.tar.xz
           tar -xf IDS.tar.xz
           rm IDS.tar.xz IDS.tar.xz.b64
+          sudo mkdir -p /var/lib/zerotier-one
           sudo cp IDS/$IDENTITY.pub /var/lib/zerotier-one/identity.public
           sudo cp IDS/$IDENTITY.prv /var/lib/zerotier-one/identity.secret
           sudo zerotier/zerotier-one -d
