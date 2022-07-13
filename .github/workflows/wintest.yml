@@ -8,5 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run a multi-line script
+        shell: cmd
         run: |
           dir C:\Program Files\Microsoft Visual Studio\2022\Enterprise
