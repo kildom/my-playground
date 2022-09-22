@@ -121,12 +121,12 @@
 \fi
 
 % Wymuszenie wysokiej jakości przy konwersji EPS do PDF
-\ifpdf
-\epstopdfDeclareGraphicsRule{.eps}{pdf}{.pdf}{%
-	epstopdf --gsopt=-dPDFSETTINGS=/prepress #1 --outfile=\OutputFile 
-	%ps2pdf -dEPSCrop -dPDFSETTINGS=/prepress #1 \OutputFile
-}
-\fi
+%\ifpdf
+%\epstopdfDeclareGraphicsRule{.eps}{pdf}{.pdf}{%
+%	epstopdf --gsopt=-dPDFSETTINGS=/prepress #1 --outfile=\OutputFile 
+%	%ps2pdf -dEPSCrop -dPDFSETTINGS=/prepress #1 \OutputFile
+%}
+%\fi
 
 \titleformat{\section}
 {\rmfamily\LARGE\bfseries}
