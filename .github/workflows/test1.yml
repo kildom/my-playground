@@ -12,3 +12,7 @@ jobs:
         with:
           working_directory: text
           root_file: main.tex
+      - uses: actions/upload-artifact@v2
+        with:
+          name: PDF
+          path: text/main.pdf
