@@ -1,0 +1,75 @@
+% !TeX spellcheck = pl_PL
+
+\rozdzial
+
+\section{Graficzny interfejs użytkownika}
+
+
+Zadanie realizowane przez układy FPGA często wymagają komunikacji z~operatorem. Systemy, w których znajdują się układy reprogramowalne składają się nie rzadko z wielu czujników, sterowników, urządzeń wejścia-wyjścia. Może być konieczne, aby użytkownik mógł monitorować stany tych urządzeń, przeglądać dane historyczne, regulować ich parametry, zadawać wartości wejściowe, itp.
+W przypadku tak złożonych potrzeb nie zawsze możliwe jest stworzenie prostego i intuicyjnego interfejsu (opartego np. o przyciski, diody LED, wyświetlacze alfanumeryczne), który równocześnie będzie na tyle uniwersalny, że pozwoli na dostęp do każdego komponentu jak również do ogólnego stanu systemu. \cite{xilinxHmi}
+
+\subsection{Proste rozwiązania}
+\label{Proste_rozwiązania}
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}[b]{7.5cm}
+		\obrazpng{0 0 1471 893}{7.5cm}{obrazki/RapidVGA.png}
+		\caption{ Moduł przedstawiony w \cite{RapidFPGA}. }
+	\end{subfigure}
+	~
+	\begin{subfigure}[b]{7cm}
+		\obrazpng{0 0 1471 893}{7cm}{obrazki/VGAOpenCores.png}
+		\caption{ Moduł z projektu OpenCores \cite{VGAOpenCores}. }
+	\end{subfigure}
+	\caption{ Przykłady prostych modułów graficznych wyświetlających interfejs znakowy. }
+	\label{VGATermExample}
+\end{figure}
+
+
+Jednym z najprostszych rozwiązań i przy tym popularnym jest grafika oparta o~wyświetlanie znaków. To samo podejście było używane do wyświetlania wyjścia na ekran komputera zanim zaczęto stosować karty graficzne, ponieważ nie wymaga to dużej ilości pamięci i bramek logicznych, co w czasach pierwszych komputerów PC było bardzo cenne. Dane zapisane są w dwóch pamięciach: pamięć ROM czcionek, oraz pamięć RAM znaków. W czasie generowania obrazu dane z pamięci znaków są odczytywane na podstawie pozycji X/Y obszaru aktualnie generowanego. Na podstawie odczytanych danych określany jest adres w pamięci czcionek, gdzie znajduje się monochromatyczna bitmapa, która następnie jest wysyłana przez sygnał wideo piksel po pikselu, linia po linii \cite{RapidFPGA}. Rysunek \ref{VGATermExample} przedstawia przykładowe moduły graficzne używające tej techniki.
+
+
+Taka technika stała się zarodkiem rozwiązania przedstawionego w tej pracy, ponieważ zużywa niewielką ilość pamięci oraz nie wymaga wielu zasobów FPGA. Nadal zostały zachowane dwie pamięci oraz podobny przepływ danych, jednak pamięć RAM znaków posiada bardziej rozbudowaną strukturę.
+
+
+Innym rozwiązaniem jest generacja elementów obrazu bezpośrednio w kodzie Verilog lub VHDL. Nie jest to popularny sposób, ponieważ wymaga nowych zasobów dla każdego nowego elementu interfejsu, co znacząco ogranicza ich maksymalną ilość. Dodatkowo zmiany w interfejsie wymagają większego nakładu pracy, niż w przypadku innych rozwiązań. \cite{RapidFPGA}
+
+
+Kolejnym prostym sposobem jest podłączenie zewnętrznego urządzenia, które spełnia zadania interfejsu użytkownika. Może to być np. komputer PC z uruchomionym na nim dedykowanym programem lub dedykowane urządzenie HMI stosowane np. w~systemach SCADA. W układzie FPGA należy tylko zaimplementować odpowiedni interfejs komunikacji z docelowym urządzeniem \cite{HMI_with_FPGA}. Takie rozwiązanie jest proste w~kontekście samego układ FPGA, ale niekiedy podłączenie dedykowanego urządzenia może być nie możliwe lub może generować dodatkowe niepotrzebne koszty.
+
+
+\subsection{Zaawansowane rozwiązania}
+
+
+Wraz z rozwojem grafiki komputerowej użytkownicy przyzwyczaili się do posiadania zaawansowanego interfejsu. Rozwiązania przedstawione w rozdziale \ref{Proste_rozwiązania} wydają się bardzo przestarzałe. Układy FPGA są w stanie spełnić to zapotrzebowanie, jednak dzieje się to kosztem dodatkowych zasobów.
+
+
+Wspólnymi cechami wszystkich zaawansowanych rozwiązań graficznych w układach FPGA jest konieczność podłączenia pamięci zewnętrznej oraz zastosowanie rozbudowanego procesora, np. MicoBlaze lub ARM. To może wiązać się z dodatkowymi kosztami.
+
+
+Bazowym założeniem tego typu rozwiązań jest to, że cały obraz ekranu jest zawarty w pamięci, która jest wyświetlana bezpośrednio na ekranie i jednocześnie ma do niej dostęp procesor. Uruchomiony na procesorze system operacyjny posiada sterowniki graficzne sterujące wyświetlaniem obrazu oraz umożliwiające oprogramowaniu jego kontrolowanie. Biblioteki typu Qt, Windows GDI, OpenGL ES 1.1, DirectX umożliwiają realizację interfejsu użytkownika w bardzo prosty sposób. Dodatkowo biblioteki i~sterowniki mogą być wspierane przez akceleratory graficzne. Xilinx zaleca do swoich produktów akceleratory Xylon \cite{xilinxHmi}. Przykładowy oraz wygenerowany z użyciem akceleratorów tej firmy przedstawia rysunek~\ref{XylonDemo}. Znajduje się na nim okno stworzone przy pomocy biblioteki Qt i uruchomiane w systemie Linux na procesorze ARM. Tak rozbudowane wsparcie dla grafiki pozwala na tworzenie bardzo wymagających interfejsów użytkownika.
+
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 1024 625}{10cm}{obrazki/XylonDemo.png}
+	\caption{ Demonstracyjny obraz HMI z wykorzystaniem rozwiązań firmy Xylon. \cite{logi3D} }
+	\label{XylonDemo}
+\end{figure}
+
+
+Taka architektura grafiki nie różni się znacząco od tej stosowanej w komputerach PC. Programista nie posiadający wiedzy na temat układów FPGA, ale mający doświadczenie z popularnymi bibliotekami graficznymi, jest w stanie stworzyć graficzny interface użytkownika, co jest znaczącą zaletą tego rozwiązania.
+
+
+\subsection{Rozwiązania pośrednie}
+
+
+Poszukiwania rozwiązania będącego kompromisem pomiędzy przyjaznym dla użytkownika inferfejsem, a brakiem konieczności użycia zewnętrznych elementów i wielu zasobów FPGA, nie przyniosły rezultatów. Dlatego ta praca może być sposobem na zapełnienie tej niszy.
+
+
+\subsection{Podsumowanie}
+
+
+Systemy oparte o układy FPGA często wymagają obsługi przez operatora. Odpowiednio skonstruowany interfejs użytkownika jest ważnym aspektem wielu urządzeń, dlatego nie może on być zbyt uproszczony. Istnieją zaawansowane rozwiązanie oparte o rozbudowane procesory i zewnętrze pamięci RAM, ale ich zastosowanie wiąże się z dodatkowymi kosztami. Trudno znaleźć rozwiązania pośrednie, które nie spowodują zwiększenia kosztów, ale zapewnią lepsze wrażenia użytkownika. Takie rozwiązanie zostało wykonane w tej pracy.
+

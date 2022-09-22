@@ -1,0 +1,139 @@
+% !TeX spellcheck = pl_PL
+
+\rozdzial
+
+\section{Biblioteka GUI dla procesora PicoBlaze}
+\label{guilib_section}
+
+
+Interfejs sprzętowy modułu graficznego dla procesora PicoBlaze nie jest rozbudowany, dlatego wykonywanie czynności związanych z obsługą graficznego interfejsu użytkownika (GUI) przy pomocy interfejsu sprzętowego jest uciążliwe. Z tego powodu powstała biblioteka napisana dla PicoBlaze'a, która znacznie upraszcza programiście budowanie aplikacji z wykorzystaniem GUI.
+
+
+Cały graficzny interfejs użytkownika zrealizowany w tej pracy można podzielić na dwie warstwy:
+
+\begin{itemize}
+	\item \textbf{Warstwa prezentacji}, która jest wykonana przy pomocy tekstu ze znacznikami formatującymi umieszczonego w pamięci modułu graficznego. Nie definiuje ona zachowania elementów ekranu, a jedynie ich wygląd. Stanowi szablon graficznego interfejsu użytkownika.
+	\item \textbf{Warstwa logiki}, która działa w procesorze PicoBlaze. W skład tej warstwy wchodzi biblioteka opisana w tym rozdziale oraz aplikacja. Biblioteka wykorzystuje informacje z warstwy prezentacji, aby ,,ożywić'' jej zawartość, np. obsłużyć kliknięcia w przyciski, wybieranie elementów, wpisywanie tekstu, zmienianie stanu. Aplikacja odczytuje zdarzenia generowane przez GUI i odpowiednio reaguje zmieniając stan wybranych kontrolek lub wykonując inne akcje.
+\end{itemize}
+
+Powyższe warstwy oddzielone są sprzętowo od siebie, dlatego nie ma bardzo dużych możliwości sterowania zawartością ekranu jak w przypadku innych bibliotek, które w~całości działają po stronie procesora. Ograniczenie to nie jest znaczącym problemem, gdy celem jest stworzenie prostego interfejsu użytkownika.
+
+
+\subsection{Tworzenie graficznego interfejsu użytkownika}
+\label{Tworzenie_graficznego_interfejsu_uzytkownika}
+
+Tworzenie interfejsu należy rozpocząć do utworzenia pliku opisującego warstwę prezentacji. Wykonuje się to używając tekstu i znaczników formatujących. Dla przykładu, aby wstawić na ekran kontrolkę typu ,,check box'' z tekstem ,,Przykład 1'' o~identyfikatorze ,,PRZYKLAD\_1'' i wartości zapisanej w polu ,,VALUE'', należy wpisać tekst ze znacznikami podany na rysunku \ref{ftCheckBox} (znaczenie znaczników w komentarzach obok). Efekt takiego kodu przedstawia rysunek \ref{ftCheckBoxResult}.
+
+\begin{figure}[h]
+	\centering
+	\setlength{\fboxsep}{2mm}
+	\setlength{\fboxrule}{0.5pt}
+	\fbox{\obrazpng{0 0 1471 893}{15cm}{obrazki/ftCheckBox.png}}
+	\caption{ Tekst ze znacznikami formatującymi tworzący kontrolkę typu ,,check box''. }
+	\label{ftCheckBox}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\obrazpng{0 0 1471 893}{12cm}{obrazki/ftCheckBoxResult.png}
+	\caption{ Wszystkie możliwe stany przykładowej kontrolki. }
+	\label{ftCheckBoxResult}
+\end{figure}
+
+Taki kod jest następnie kompilowany przy pomocy skryptu wykonanego do tego celu. Efektem kompilacji jest utworzenie dwóch plików:
+
+\begin{itemize}
+	\item Plik z definicją modułu zawierającego pamięć tekstu w Verilog'u, który należy dołączyć do modułu graficznego.
+	\item Plik ze stałymi definiującymi nazwy kontrolek i pól użytych w tekście, które mogą być później użyte przez programistę. Należy go dołączyć do głównego pliku programu dla PicoBlaze'a.
+\end{itemize}
+
+Tak utworzona kontrolka może być obsługiwana przez bibliotekę, więc programista może już operować na niej. Biblioteka wysyła różnego rodzaju zdarzenia, które można pobrać funkcją {\ttfamily guiGetEvent}. Najprostszym z nich jest zdarzenie kliknięcia. To zdarzenie wystarczy do obsługi kontrolki z powyższego przykładu. W efekcie klikania zaznaczenie ma się pojawiać i znikać. To można osiągnąć zmieniając wartość pola ,,VALUE'' przy pomocy funkcji {\ttfamily guiGetField} i {\ttfamily guiSetField}. Fragmenty kodu realizujące te zadania przedstawia rysunek \ref{ftCheckBoxPsm}.
+
+\begin{figure}[h]
+	\centering
+	\setlength{\fboxsep}{2mm}
+	\setlength{\fboxrule}{0.5pt}
+	\fbox{\obrazpng{0 0 1471 893}{15cm}{obrazki/ftCheckBoxPsm.png}}
+	\caption{ Przykładowa obsługa zdarzenia wciśnięcia kontrolki. }
+	\label{ftCheckBoxPsm}
+\end{figure}
+
+Przykład opisany w tym rozdziale pokazuje jedną z najprostszych kontrolek. Biblioteka ma znacznie większe możliwości, które dokładniej opisane są w rozdziale \ref{Przykladowe_obiekty}.
+
+
+\subsection{Przykładowe typy wyświetlanych obiektów}
+\label{Przykladowe_obiekty}
+
+Ten rozdział przedstawia kilka popularnie stosowanych typów kontrolek, ale nie są to pełne możliwości tej biblioteki. Tekst ze znacznikami formatującymi pozwala na opisywanie jak ma wyglądać kontrolka, dlatego interfejs użytkownika nie jest ograniczony do wąskiej grupy kontrolek. Programista ma możliwość tworzenia dowolnych innych niestandardowych obiektów interfejsu użytkownika.
+
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}[b]{9cm}
+		\obrazpng{0 0 1471 893}{8cm}{obrazki/guiexTable.png}
+		\caption{ Tabela \\ ~ }
+	\end{subfigure}
+	~
+	\begin{subfigure}[b]{5cm}
+		\obrazpng{0 0 1471 893}{5cm}{obrazki/guiexCheck.png}
+		\caption{ Pole wielokrotnego wyboru }
+	\end{subfigure}
+	~
+	\begin{subfigure}[b]{5cm}
+		\obrazpng{0 0 1471 893}{5cm}{obrazki/guiexRadio.png}
+		\caption{  Pole pojedynczego wyboru }
+	\end{subfigure}
+	~
+	\begin{subfigure}[b]{5cm}
+		\obrazpng{0 0 1471 893}{5cm}{obrazki/guiexButton.png}
+		\caption{ Przycisk  \\ ~ }
+	\end{subfigure}
+	~
+	\begin{subfigure}[b]{5cm}
+		\obrazpng{0 0 1471 893}{5cm}{obrazki/guiexLabel.png}
+		\caption{ Etykieta \\ ~ }
+	\end{subfigure}
+	~
+	\begin{subfigure}[b]{5cm}
+		\obrazpng{0 0 1471 893}{5cm}{obrazki/guiexListBox.png}
+		\caption{ Lista wyboru   }
+	\end{subfigure}
+	~
+	\begin{subfigure}[b]{5cm}
+		\obrazpng{0 0 1471 893}{5cm}{obrazki/guiexTextBox.png}
+		\caption{ Pole tekstowe }
+	\end{subfigure} 
+	~
+	\begin{subfigure}[b]{5cm}
+		\obrazpng{0 0 1471 893}{5cm}{obrazki/guiexProgressBar.png}
+		\caption{ Pasek postępu }
+	\end{subfigure} 
+	
+	\caption{ Przykładowe kontrolki, które mogą wchodzić w skład interfejsu użytkownika. }
+	\label{GUIControlsExamples}
+\end{figure}
+
+Rysunek \ref{GUIControlsExamples} (a) pokazuje przykładową tabelę. Wszelkie tabele lub ramki można tworzyć przez odpowiednie operowanie znacznikiem koloru tła w tekście, np. wstawienie znacznika niebieskiego koloru tła \textit{\{b:blue\}} i następnie znacznika białego koloru tła \textit{\{b:white\}} spowoduje wyświetlenie pionowej niebieskiej linii, którą można zobaczyć na rysunku~\ref{renderExample}. Tabele i ramki zazwyczaj są statyczne i nie wymagają obsługi ze strony procesora, natomiast wewnątrz mogą się znaleźć dynamiczne kontrolki, np. pole tekstowe. Moduł graficzny nie pozwala na dodanie pasków przewijania, np. w celu obsługi dużych tabel.
+
+Rysunki \ref{GUIControlsExamples} (b) i (c) przedstawiają pola wyboru. Informacje na temat tworzenia i~obsługi tego typu kontrolek znajdują się w rozdziale \ref{Tworzenie_graficznego_interfejsu_uzytkownika}.
+
+Rysunek \ref{GUIControlsExamples} (d) zawiera przykładowy przycisk. W warstwie prezentacji jest to prostokąt z tekstem otoczony ramką. W warstwie logiki nie różni się znacząco od pola wielokrotnego wyboru, dlatego można się posłużyć rozdziałem \ref{Tworzenie_graficznego_interfejsu_uzytkownika}. Zamiast stanów ,,zaznaczony''/,,odznaczony'' przyjmuje on stany ,,wciśnięty''/,,zwolniony''.
+
+Rysunek \ref{GUIControlsExamples} (e) pokazuje etykietę, czyli statyczny tekst, który programista może dowolnie zmieniać. Etykieta nie musi być oddzielną kontrolką. Każdy tekst wyświetlony na ekranie może zachowywać się jak etykieta, np. komórka tabeli, tekst przycisku, tekst pola wyboru. Funkcja {\ttfamily guiSetChar} pozwala na zmienianie wnętrza etykiety znak po znaku.
+
+Rysunek \ref{GUIControlsExamples} (f) przedstawia listę wyboru. W efekcie jej wciśnięcia pokazuje się nowy widok z możliwością wyboru jednej z wielu opcji. Po wyborze następuje powrót do poprzedniego widoku i zastąpienie widocznego tekstu wybraną opcją. Takie zachowanie zapewnia biblioteka dzięki funkcji {\ttfamily guiHandleListBox}. Programista dostaje tylko zdarzenie dotyczące tej kontrolki i może pobrać wartość pola zawierającego numer wybranej opcji przy pomocy funkcji {\ttfamily guiGetField}.
+
+Rysunek \ref{GUIControlsExamples} (g) zawiera pole tekstowe. Jego obsługa jest najbardziej złożona i~wymaga również użycia wejścia klawiatury. Gdy kontrolka jest aktywna kody wciskanych klawiszy zostają przechwycone przez bibliotekę i nie dochodzą do programisty w postaci zdarzenia, ale zmieniają zawartość pola. Programista otrzymuje informację o zdarzeniu zmiany zawartości pola oraz zatwierdzeniu zmian wciśnięciem klawisza ,,ENTER'' lub wyjściem z tej kontrolki (kontrolka staje się nieaktywna). Ciąg znaków zawarty w tym polu może zostać pobrany przy pomocy funkcji {\ttfamily guiGetChar}. Całą funkcjonalność związaną z polem tekstowym zapewnia funkcja {\ttfamily guiHandleTextBox}. Istnieje możliwość ograniczenia możliwych wartości wpisywanych przez użytkownika tylko do liczb. Wówczas pobranie wartości z automatyczną konwersją do liczby następuje przy pomocy funkcji {\ttfamily guiGetInt}.
+
+Rysunek \ref{GUIControlsExamples} (h) przedstawia pasek postępu. Możliwe jest tworzenie tylko poziomych pasków, co wynika to z ograniczeń znaczników formatujących w tekście. Wiele połączonych pasków może również służyć jako wykres słupkowy. Aby zwiększyć czytelność paska, można dodać skalę przy pomocy etykiet. Aktualnie wyświetlaną wartość programista może zmienić używają funkcję {\ttfamily guiSetProgress}.
+
+\subsection{Interfejs programistyczny}
+
+Biblioteka składa się z wielu plików zawierających kod źródłowy napisany w~assemblerze. Programista piszący program dla PicoBlaze'a z użyciem biblioteki może dołączyć dowolne z tych plików do swojego pliku głównego. W ten sposób kod wynikowy zawiera tylko funkcje, które rzeczywiście są wykorzystywane. Plik ,,guiFirst.psm'' musi zostać zawsze dodany i zawiera podstawowe funkcje biblioteki np. {\ttfamily guiGetEvent}. Po nim występują opcjonalne pliki ,,gui*.psm'', a na koniec należy dodać ,,guiLast.psm''.
+
+Biblioteka nie operuje na konkretnych rejestrach, ale na szesnastu nazwach GR0, GR1, itd. aż do GRF. Programista przed dodaniem biblioteki (przed ,,guiFirst.psm'') musi zdefiniować te nazwy przy pomocy dyrektyw ,,NAMEREG''. Takie rozwiązanie pozwana na większą elastyczność np. w celu uniknięcia konfliktów z istniejącym już kodem.
+
+Ogólna koncepcja interfejsu polega na periodycznym wywoływaniu funkcji {\ttfamily guiGetEvent} oraz funkcji do obsługi specjalnych kontrolek (np. {\ttfamily guiHandleTextBox}). Funkcje te zawracają numery zdarzeń, na które programista powinien odpowiednio zareagować. W efekcie tych lub innych zdarzeń zawartość ekranu może być zmieniana przy pomocy odpowiednich funkcji, np. {\ttfamily guiSetChar}, {\ttfamily guiSetField}.
+
+Dobrym sposobem na zapoznanie się z biblioteką jest przeczytanie kodów źródłowych przykładowej aplikacji opisanej w rozdziale \ref{roz_przyklady}. Pozwala to zobaczyć jak praktycznie wygląda współpraca programu głównego z biblioteką GUI.
+

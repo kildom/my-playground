@@ -1,0 +1,162 @@
+% !TeX spellcheck = pl_PL
+
+% Dokument
+\documentclass[a4paper,12pt,twoside]{article}
+
+% Pakiety
+\usepackage{ifpdf}
+\usepackage{polski}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{longtable}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{multirow}
+\ifpdf
+\usepackage[pdftex]{graphicx}
+%\pdfcompresslevel=9
+\usepackage{epstopdf}
+\usepackage[
+	hidelinks,
+	linktoc=all,
+	pdfauthor={Dominik Kilian},
+	pdftitle={Praca magisterska},
+	pdfsubject={Praktyczne algorytmy optymalizacji dla zastosowan
+		w srodowisku sterowania nadrzednego},
+	pdfkeywords={algorytmy optymalizacji},
+	pdfproducer={Latex with hyperref},
+	pdfcreator={pdflatex}
+	]{hyperref}
+\else
+\usepackage{graphicx}
+\fi
+\usepackage{caption}
+\usepackage{tokenizer}
+\usepackage[justification=centering]{caption}
+\usepackage{rotating}
+\usepackage[all]{nowidow}
+\usepackage{subcaption}
+
+% Wymiary strony
+\setlength{\voffset}{-25.4mm}
+\setlength{\hoffset}{-25.4mm}
+\setlength{\textheight}{236mm}
+\setlength{\textwidth}{160mm}
+\setlength{\footskip}{10mm}
+\setlength{\oddsidemargin}{30mm}
+\setlength{\evensidemargin}{20mm}
+\setlength{\topmargin}{20mm}
+\setlength{\headsep}{10mm}
+\setlength{\headheight}{0mm}
+
+% Styl akapitu
+\setlength{\parindent}{8mm}
+\setlength{\parskip}{2.5mm}
+\linespread{1.25}
+\raggedbottom
+
+% Dzielenie wyrazów
+%\tolerance=1
+\emergencystretch=\maxdimen
+%\hyphenpenalty=10000
+%\hbadness=10000
+\righthyphenmin=6
+\lefthyphenmin=6
+
+% Style nagłówków
+\titleformat{\section}{\normalfont\LARGE\bfseries\sffamily}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\Large\bfseries\sffamily}{\thesubsection}{1em}{}
+%\titleformat{\subsubsection}{\normalfont\large\bfseries\sffamily}{\thesubsubsection}{1em}{}
+
+% Nagłówek i stopka
+\newcommand{\normalnastopka}{
+	\lhead{~\ifthenelse{\isodd{\thepage}}{}{\small{Dominik Kilian}}}
+	\chead{}
+	\rhead{\ifthenelse{\isodd{\thepage}}{\small{Wykorzystanie procesora PicoBlaze do współpracy z wybranym modułem układu FPGA}}{}~}
+	%\lfoot{~\ifthenelse{\isodd{\thepage}}{\rightmark}{\thepage} }
+	\lfoot{~\ifthenelse{\isodd{\thepage}}{Kraków 2016}{\thepage} }
+	\cfoot{}
+	%\rfoot{\ifthenelse{\isodd{\thepage}}{\thepage}{\rightmark}~}
+	\rfoot{\ifthenelse{\isodd{\thepage}}{\thepage}{Praca dyplomowa inżynierska}~}
+	\renewcommand{\headrulewidth}{0.3pt}
+	\renewcommand{\footrulewidth}{0.3pt}
+}
+
+
+\newcommand{\czystastopka}{
+	\lhead{}
+	\chead{}
+	\rhead{}
+	\lfoot{}
+	\cfoot{}
+	\rfoot{}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\renewcommand{\subsectionmark}[1]{}
+\renewcommand{\subsubsectionmark}[1]{}
+
+% Numerowanie rysunków
+\captionsetup{labelsep = period}
+\renewcommand{\thefigure}{\thesection.\arabic{figure}}
+
+% Prefix na początek rozdziału rozdziały
+\newcommand{\rozdzial}{
+	%TODO uncomment
+	\cleardoublepage
+	\setcounter{figure}{0}
+}
+
+% Nowa komenda dodająca poprawnie PNG
+\ifpdf
+\newcommand{\obrazpng}[3]{\includegraphics[width=#2]{#3}}
+\else
+\newcommand{\obrazpng}[3]{\includegraphics[bb = #1, width=#2]{#3}}
+\fi
+
+% Wymuszenie wysokiej jakości przy konwersji EPS do PDF
+\ifpdf
+\epstopdfDeclareGraphicsRule{.eps}{pdf}{.pdf}{%
+	epstopdf --gsopt=-dPDFSETTINGS=/prepress #1 --outfile=\OutputFile 
+	%ps2pdf -dEPSCrop -dPDFSETTINGS=/prepress #1 \OutputFile
+}
+\fi
+
+\titleformat{\section}
+{\rmfamily\LARGE\bfseries}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\rmfamily\large\bfseries}
+{\thesubsection}{1em}{}
+
+%%%%%%%%%%%%%% TODO COMMENT BELOW AT FINAL VERSION
+
+\usepackage{forloop}
+
+\usepackage{xcolor}
+
+\newcommand{\todo}[1]{
+\definecolor{shadecolor}{RGB}{150,200,120}
+	\colorbox{shadecolor} {\textbf{TODO:} \textit{#1}}
+}
+
+% Puste strony (PLACE HOLDER)
+\newcounter{themenumber}
+\newcommand{\puste}[1]{
+\pagebreak
+\forloop{themenumber}{1}{\value{themenumber} < #1}{
+\begin{center}
+\textit{\textbf{--- --- PLACE HOLDER --- ---}}
+\end{center}
+\pagebreak
+}
+}
+
+\renewcommand{\puste}[1]{}

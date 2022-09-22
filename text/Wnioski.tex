@@ -1,0 +1,20 @@
+% !TeX spellcheck = pl_PL
+
+\rozdzial
+\section{Wnioski}
+	
+
+Wykonanie systemu, który zapewnia przyjemny dla użytkownika interfejs graficzny, a jednoczenie nie wymaga wielu zasobów układu FPGA, okazało się możliwe. Jednym z ważniejszych powodów, dla których tak było, jest zastosowanie niewielkiego procesora PicoBlaze. Wykonane moduły wejścia-wyjścia są zoptymalizowane pod względem ilości zasobów i zajmują ok. trzykrotną wielkość samego procesora PicoBlaze.
+
+Alternatywne rozwiązania pozwalają na jeszcze większą redukcję zasobów kosztem znacznego pogorszenia jakości interfejsu graficznego lub zwiększenie jakości i możliwości interfejsu kosztem znacznie większej ilości zasobów. Rozwiązanie wykonane w tej pracy jest czymś pośrednim między tymi dwoma alternatywami dzięki odpowiedniemu zrównoważeniu kosztu i atrakcyjności interfejsu użytkownika.
+
+Zastosowanie procesora innego niż PicoBlaze wiąże się ze zwiększenie rozmiarów całego systemu. Procesor ten całkowicie wystarcza, aby realizować zadania obsługi prostego interfejsu graficznego, dlatego jest on najlepszym rozwiązaniem problemu postawionego na wstępie tej pracy.
+
+Moduł graficzny, który generuje kolejne piksele już w czasie wysyłania ich na interfejs wyjściowy VGA, pozwala na znaczącą redukcję ilości zajmowanej pamięci. Nie jest konieczne przetrzymywanie koloru każdego piksela obrazu w pamięci, a jedynie samego tekstu, znaczników formatujących oraz czcionek. Taka organizacja pamięci wymaga jednak bardziej skomplikowanej logiki modułu graficznego oraz powoduje, że obsługa grafiki nie jest trywialna. Aby uprościć korzystanie z modułu graficznego, powstały odpowiednie biblioteki dla procesora PicoBlaze.
+
+Wykonana w tej pracy przykładowa aplikacja demonstracyjna pokazuje, że takie rozwiązanie wystarcza do realizacji prostego interfejsu HMI.
+
+	
+	
+
+

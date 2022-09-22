@@ -1,0 +1,25 @@
+{i:PRZYKLAD_1}                               {! Rozpoczęcie kontrolki PRZYKLAD_1 }
+{s:PRZYKLAD_1:focus}{b:window}{/}{b:green}{-}{! Zmiana koloru tła na zielony lub 
+                                             domyślny w zależności od tego, czy kontrolka jest aktywna }
+{s:VALUE}{:unchecked}{/}{:checked}{-}        {! Wypisanie znaku specjalnego
+                                             "kratka nie zaznaczona", gdy pole VALUE jest równe zero lub "kratka zaznaczona" w przeciwnym wypadku }
+~~Przykład 1                                 {! Wypisanie tekstu }
+{b:window}                                   {! Powrót do domyślnego koloru tła }
+{i}                                          {! Zakończenie aktualnej kontrolki }
+
+
+
+
+call    guiGetEvent       ; wywołanie funkcji pobierającej zdarzenia z GUI
+compare GR0, PRZYKLAD_1   ; sprawdzenie ID kontrolki, która odpaliła zdarzenie
+jump    Z, przyklad       ; wywołanie procedury obsługi zdarzenia przypisanego
+                          ; tej kontrolce
+...
+...
+przyklad:
+load    GR0, VALUE 
+call    guiGetField       ; odczytanie wartości pola VALUE
+xor     GR1, FF           ; negacja odczytanej wartości
+call    guiSetField       ; zapisanie wartości ponownie do pola VALUE
+jump    EndOfEventHandling; zakończ obsługę zdarzenia
+

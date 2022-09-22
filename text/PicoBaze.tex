@@ -1,0 +1,395 @@
+% !TeX spellcheck = pl_PL
+
+\rozdzial
+
+\section{Procesor PicoBaze}
+
+
+Procesor PicoBlaze jest procesorem programowym, czyli wykonanym w całości na układzie reprogramowalnym przy pomocy języka VHDL lub Verilog \cite{wiki_Mikroprocesor_programowy}.
+Procesor ten wykonany jest przez firmę Xilinx i przeznaczony wyłącznie dla układów tej firmy. Może on działać na wszystkich układach FPGA oraz wybranych układach CPLD.
+Istnieje kilka wariantów procesora. Każdy wariant przeznaczony jest dla innej grupy układów Xilinx:
+
+\begin{itemize}
+	\item		\textbf{KCPSM6} przeznaczony jest dla układów Spartan-6, Virtex-6, 7-Series, Zynq i~UltraScale \cite{kcpsm6}.
+	\item		\textbf{KCPSM3} przeznaczony jest dla układów Spartan-3, Virtex-4, Virtex-5, Virtex-II i~Virtex-IIPRO \cite{kcpsm3}.
+	\item		\textbf{XAPP387} przeznaczony jest dla układów CPLD \cite{PicoBlazeList}.
+	\item		\textbf{KCPSM, KCPSM2, XAPP213, XAPP627} zostały oznaczone przez producenta jako przestarzałe i przeznaczone są dla starszych układów Xilinx  \cite{PicoBlazeList}.
+\end{itemize}
+
+
+W ramach tej pracy zostanie wykorzystany najnowszy wariant procesora, czyli KCPSM6. Funkcjonalność, która zostanie użyta, nie będzie przekraczała również możliwości wariantu KCPSM3. Z tego powodu możliwe będzie uruchomienie systemu na tym procesorze po niewielkich zmianach wynikający z nieznacznie zmienionej architektury. Pozostałe procesory nie posiadają funkcjonalności wymaganej do działania projektu, więc nie zostały uwzględniony w tej pracy. Nie jest to duża wada, ponieważ układy wspierające te procesory zostały w dużej mierze wyparte przez ich nowsze odpowiedniki.
+
+
+Wykorzystanie niewielkiego fragmentu logiki reprogramowalnej jako procesora jest często bardziej efektywnym sposobem implementacji sekwencyjnych zadań np. maszyny stanów lub obsługi interfejsu użytkownika. Język programowania procesorów jest bardziej naturalnym sposobem opisu sekwencyjnych algorytmów niż język opisu sprzętu, który lepiej jest przystosowany do realizacji zadań równoległych.
+\cite{kcpsm6}
+
+
+PicoBlaze jest 8-bitowym procesorem, którego największą zaletą jest niewielki rozmiar. Dzięki temu może zostać wielokrotnie dodany do jednego układu FPGA. Ilość zasobów zajętych przez procesor jest niewielka -- tylko 26 elementy Slice i jeden BRAM, czyli jest to ok. \textbf{4,3\%} najmniejszego układu z serii 6 (XC6SLX4) i ok. \textbf{0,11\%} układu XC6SLX150T \cite{kcpsm6}. Rysunek \ref{PicoBlazeSize} pokazuje zajęte miejsce przez procesor PicoBlaze w~przykładowym układzie FPGA.
+
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 732 721}{13cm}{obrazki/PicoBlazeSize.png}
+	\caption{Zasoby układu XC3S500E zajęte przez jedną instancję procesora PicoBlaze (wygenerowano automatycznie programem ,,Floorplanner'') \cite{kcpsm3_spi}. }
+	\label{PicoBlazeSize}
+\end{figure}
+
+
+Kolejną zaletą procesora jest jego prostota obsługi. Aby użyć PicoBlaze, wystarczą podstawowe umiejętności programowania w języku VHDL lub Verilog. Zapewnia on prosty interfejs, który może zostać podpięty do innych modułów w układzie FPGA. Więcej informacji na ten temat znajduje się w rozdziale \ref{picoblaze_arch} dotyczącym architektury.
+
+
+Jednym z celów pracy jest wykonanie rozwiązania zoptymalizowanego pod względem ilości zasobów. Procesor PicoBlaze również został stworzony w takim celu, dlatego idealnie pasuje do tej pracy. Dzięki niewielkiemu rozmiarowi oraz łatwemu uruchomianiu na dowolnym układzie FPGA Xilinx, procesor pozwana na stworzenie takiego rozwiązania, które programista z łatwością może dodać do własnego systemu.
+
+
+\subsection{Architektura}
+\label{picoblaze_arch}
+
+KCPSM6 jest 8-bitowym procesorem, który może wykonywać instrukcje z pamięci programu o rozmiarze do 4096 instrukcji. Każda instrukcja ma długość 18 bitów. Jest ona wykonywana w czasie 2 cykli zegara, który może osiągać częstotliwości do 232MHz na układach Virtex-7. Maksymalne częstotliwości osiągalne na innych urządzeniach przedstawione są w tabeli \ref{tab:kcpsm5speed}. Liczba instrukcji na sekundę jest dwukrotnie mniejsza od częstotliwości zegara, więc opierając się na tabeli \ref{tab:kcpsm5speed}, prędkość procesora waha się w~granicach 41-116 MIPS. Jest to lepszy wynik niż wiele prostych sprzętowych 8-bitowych mikrokontrolerów.
+
+
+\begin{table}[h]
+	\begin{center}
+	\begin{tabular}{|l|r|r|r|}
+	\hline
+	\multirow{2}{*}{Układ} & \multicolumn{3}{|c|}{Klasa prędkości}  \\
+	\cline{2-4}
+	& -1 & -2 & -3 \\
+	\hline
+	Spartan-6 & 82MHz & 105MHz & 136MHz \\
+	Virtex-6  & b.d.  & b.d.   & 238MHz \\
+	Kintex-7  & 185MHz& b.d.   & 238MHz \\
+	Virtex-7  & b.d.  & b.d.   & 232MHz \\
+	\hline
+	\end{tabular}
+	\caption{Prędkości osiągnięte przez KCPSM6 na wybranych układach FPGA \cite{kcpsm6}.}
+	\label{tab:kcpsm5speed}
+	\end{center}
+\end{table}
+
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 1072 940}{16cm}{obrazki/KCPSM6Arch.png}
+	\caption{Architektura procesora KCPSM6 \cite{kcpsm6}. }
+	\label{KCPSM6Arch}
+\end{figure}
+
+
+KCPSM6 posiada 2 banki 8-bitowych rejestrów ogólnego przeznaczenia. Każdy bank zawiera 16 rejestrów. Służą one do przechowywania danych i wymiany ich między ALU, pamięcią RAM i portami IO. Dodatkowo PicoBlaze posiada pamięć ,,Scratch Pad Memory'', o zmiennym rozmiarze od 64 do 256 bajtów. Podstawowe operacje arytmetyczne wykonuje 8-bitowa ALU (jednostka arytmetyczno-logiczna). Adresy powrotów są wkładane na 30-elementowy stos sprzętowy. Wymiana danych z~urządzeniami wejścia-wyjścia odbywa się przez port o 8-bitowej szerokości szyny danych i adresu, co zapewnia 256 bajtów przestrzeni wejścia-wyjścia. Do procesora doprowadzony jest sygnał, który powoduje wykonanie przerwania sprzętowego. Schemat całej architektury przedstawia rysunek \ref{KCPSM6Arch}.
+
+
+Architektura KCPSM3 jest zbliżona do KCPSM6, ale różni się wielkością. Schemat procesora przedstawia rysunek \ref{KCPSM3Arch}. Podstawowe różnice tej architektury to:
+
+\begin{itemize}
+	\item		brak drugiego banku rejestrów ogólnego przeznaczenia,
+	\item		pamięć ,,Scratch Pad Memory'' nie może być większa niż 64 bajty,
+	\item		pamięć programu może mieć maksymalnie 1024 instrukcje,
+	\item		brak sygnału sleep.
+\end{itemize}
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 1072 940}{16cm}{obrazki/KCPSM3Arch.png}
+	\caption{Architektura procesora KCPSM3 \cite{kcpsm3}. }
+	\label{KCPSM3Arch}
+\end{figure}
+
+
+
+PicoBlaze wymaga podłączenia pamięci programu. Najczęściej używa się do tego pamięci BRAM, ale można też użyć pamięci rozproszonej. Aby możliwe było komunikowanie się procesora z pozostałymi elementami projektu, należy połączyć sygnały \mbox{wejścia-wyjścia}. Przykładową konfigurację połączeń przedstawiono na rysunku~\ref{KCPSM6IO}. Dodatkowo można podłączyć sygnały sterujące procesorem, które odpowiadają za obsługę przerwań, reset oraz przejście do stanu uśpienia.
+
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 1072 940}{15cm}{obrazki/KCPSM6IO.png}
+	\caption{Przykładowe podłączenie procesora KCPSM6 (opracowanie własne na podstawie \cite{kcpsm6}). }
+	\label{KCPSM6IO}
+\end{figure}
+
+
+W czasie rozwoju programu programista musi wielokrotnie zmieniać i uruchamiać go na procesorze. Standardowe podejście, w którym program jest częścią konfiguracji całego układu FPGA, wymaga bardzo długiego czasu kompilacji. Od zakończenia pisania pewnej wersji programu do uruchomieniu jej na sprzęcie może minąć od kilku do kilkudziesięciu minut.
+
+Pakiet oprogramowania dołączonego do procesora PicoBlaze pozwala na wygenerowanie pamięci programu, która zawiera w sobie obsługę interfejsu JTAG. Zastosowanie takiego typu pamięci do rozwoju oprogramowania pozwala na uruchomienie programu w czasie kilku sekund. Kompilowane i wysyłane są wtedy tylko instrukcje programu, natomiast reszta układu FPGA pozostaje niezmieniona. To znacząco skraca czas potrzebny do napisania oprogramowania i pozbycia się w nim błędów.
+
+
+
+\subsection{Programowanie}
+
+
+PicoBlaze posiada pamięć do 4096 instrukcji w wariancie KCPSM6 i do 1024 instrukcji w KCPSM3. Taki rozmiar pamięci nie pozwala na wykonanie rozbudowanych algorytmów, ale wystarcza, aby zrealizować zadania przedstawione w tej pracy pozostawiając jeszcze miejsce na dodatkowy kod. Zestaw instrukcji jest bardzo zredukowany, KCPSM6 posiada ich tylko 70. Nie ma wśród nich takich operacji jak mnożenie i dzielenie. Obsługa liczb ujemnych jest tylko częściowa. Nie posiada operacji odczytu bezpośrednio z pamięci programu, co może w pewnych sytuacjach wpłynąć negatywnie na rozmiar kodu. Pełen zestaw instrukcji zawiera tabela \ref{tab:kcpsm6asm}.
+
+	
+\begin{table}[h]
+	\begin{center}
+		
+		{\scriptsize 
+			
+		\begin{tabular}{|l|l|l|l|}
+			\hline \multicolumn{4}{|c|}{ \textbf{Ustawiania rejestrów} } \\ \hline
+			LOAD sX, sY &
+			LOAD sX, kk &
+			STAR sX, sY &
+			STAR sX, kk \\
+			
+			\hline \multicolumn{4}{|c|}{ \textbf{Logiczne} } \\ \hline
+			AND sX, sY &
+			AND sX, kk &
+			OR sX, sY &
+			OR sX, kk \\
+			XOR sX, sY &
+			XOR sX, kk &&\\
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Arytmetyczne} } \\ \hline
+ADD sX, sY&
+ADD sX, kk&
+ADDCY sX, sY&
+ADDCY sX, kk\\
+SUB sX, sY&
+SUB sX, kk &
+SUBCY sX, sY&
+SUBCY sX, kk\\
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Porównania} } \\ \hline
+TEST sX, sY&
+TEST sX, kk&
+TESTCY sX, sY&
+TESTCY sX, kk\\
+COMPARE sX, sY&
+COMPARE sX, kk&
+COMPARECY sX, sY&
+COMPARECY sX, kk\\
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Przesunięcia bitowego} } \\ \hline
+SL0 sX&
+SL1 sX&
+SLX sX&
+SLA sX\\
+RL sX&
+SR0 sX&
+SR1 sX&
+SRX sX\\
+SRA sX&
+RR sX&&\\
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Wejścia i wyjścia} } \\ \hline
+INPUT sX, (sY)&
+INPUT sX, pp&
+OUTPUT sX,(sY)&
+OUTPUT sX, pp\\
+OUTPUTK kk, p&&&\\
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Pamięci podręcznej} } \\ \hline
+STORE sX,(sY)&
+STORE sX, ss&
+FETCH sX, (sY)&
+FETCH sX, ss\\
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Obsługi przerwań} } \\ \hline
+DISABLE INTERRUPT&
+ENABLE INTERRUPT&
+RETURNI DISABLE&
+RETURNI ENABLE\\
+
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Skoku}  } \\ \hline
+JUMP aaa&
+JUMP Z, aaa&
+JUMP NZ, aaa&
+JUMP C, aaa\\
+JUMP NC, aaa&
+JUMP@ (sX, sY)&&\\
+
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Wywołania funkcji} } \\ \hline
+CALL aaa&
+CALL Z, aaa&
+CALL NZ, aaa&
+CALL C, aaa\\
+CALL NC, aaa&
+CALL@ (sX, sY)&
+RETURN&
+RETURN Z\\
+RETURN NZ&
+RETURN C&
+RETURN NC&
+LOAD\&RETURN sX, kk\\
+
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Inne} } \\ \hline
+REGBANK A&
+REGBANK B&
+HWBUILD sX&\\
+
+			\hline \multicolumn{4}{|c|}{ \textbf{Oznaczenia} } \\ \hline
+			sX, sY -- rejestry &
+			kk -- stała 8-bitowa &
+			pp -- adres portu &
+			ss -- adres pamięci \\
+			\hline
+			aaa -- adres instrukcji &&& \\
+			
+			\hline
+		\end{tabular}
+	}
+	\caption{ Zestaw instrukcji KCPSM6. \cite{PicoBlaze_User_Guide}}
+	\label{tab:kcpsm6asm}
+	\end{center}
+\end{table}
+
+
+Pakiet oprogramowania dołączonego do PicoBlaze'a zawiera asembler. Tworzenie kodu wynikowego nie odbywa się w przyjętych ogólnie etapach kompilacji i linkowania. Zamiast tego cały proces odbywa się w jednym etapie. Jedynym sposobem połączenia wielu plików jest dyrektywa ,,INCLUDE''. Z tego powodu nie można stworzyć biblioteki w standardowej formie, czyli jednego skompilowanego pliku, ale wyłącznie jako zestaw plików, które programista może dołączyć do swojego głównego kodu.
+
+
+Składnia asemblera jest standardowa i została przedstawiona w tabeli \ref{tab:asm_instr}. Asembler jest prosty i nie zapewnia m.in. preprocesora lub wyrażeń obliczanych w czasie asemblacji.
+
+
+\begin{table}[h]
+	\begin{center}		
+		{\large 
+		\begin{tabular}{|p{2.75cm}p{2.75cm}p{2.75cm}p{2.75cm}p{2.75cm}|}
+			\hline
+			\textbf{etykieta:} & \textbf{instrukcja} & \textbf{operand1,} & \textbf{operand2} & \textbf{\textit{;koment.}} \\
+		\end{tabular}}
+		{\footnotesize
+			\begin{tabular}{|p{2.75cm}|p{2.75cm}|p{2.75cm}|p{2.75cm}|p{2.75cm}|}
+				Etykieta używana przy odwołaniach do tej instrukcji (opcjonalna)  &
+				Instrukcja lub dyrektywa asemblera  &
+				Pierwszy operand instrukcji (opcjonalny w instrukcji ,,RETURN'')  &
+				Drugi operand instrukcji (nie występuje we wszystkich instrukcjach)  &
+				Dowolny komentarz zakończony znakiem końca linii  \\
+				\hline
+			\end{tabular}}
+	\caption{ Składnia pojedynczej instrukcji procesora PicoBlaze. }
+	\label{tab:asm_instr}
+	\end{center}
+\end{table}
+
+
+Asembler przyjmuje jeden główny plik źródłowy, który może odwoływać się do innych dyrektywą ,,INCLUDE''. Po odczytaniu i scaleniu ich wszystkich. Przeprowadza asemblację tworząc w tym czasie pliki \textit{passX.dat}, które zawierają wewnętrzne informacje, które najczęściej nie są używane przez programistę. Tak wygenerowany kod maszynowy zostaje przekształcony na różne formaty wyjściowe. Asembler do tego celu używa szablonów \textit{ROM\_form.xyz}, gdzie \textit{xyz} to rozszerzenie wyjściowego pliku. PicoBlaze zapewnia kilka szablonów, które mogą generować kod tworzący pamięć programu w~języku VHDL i Verilog, używa do tego BRAM lub pamięć rozproszoną i udostępnia różne wielkości pamięci. Istnieją też rozbudowane szablony, które zostały przystosowane do współpracy z programem ,,JTAG Loader''. Dodatkowo generowany jest plik ,,.hex'', który zawiera czysty kod maszynowy, który może zostać załadowany do pamięci przez ,,JTAG Loader''. Pliki log zawierają dane informacyjne dotyczące zakończonej asemblacji. Interesującą funkcjonalnością asemblera jest to, że generuje plik z~poprawionym formatowaniem kodu źródłowego, co może zostać użyte w celu utrzymania schludnego kodu. Rysunek \ref{assemblerFiles} przedstawia w sposób obrazowy wykorzystywane i~generowane pliki.
+
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 2003 994}{16cm}{obrazki/assemblerFiles.png}
+	\caption{ Przepływ danych podczas asemblacji kodu dla procesora PicoBlaze (opracowanie własne na podstawie \cite{kcpsm3}). }
+	\label{assemblerFiles}
+\end{figure}
+
+
+Istnieje kompilator języka C dla procesora KCPSM3. \textit{PicoBlaze C Compiler} (PBCC) został zbudowany w oparciu o kompilator \textit{Small Decide C Compiler} (SDCC). SDCC jest przeznaczony do kompilacji programów dla prostych procesorów 8-bitowych, np.~Microchip PIC, Intel 8051, Motorola HC08. Przed wykonaniem ostatecznej wersji kodu wynikowego SDCC tworzy pół-kod \textit{intermediate representation} (IR). Twórca kompilatora PBCC wykorzystał te cechy i dodał moduł transformujący IR na assembler KCPSM3. Tak utworzony plik może zostać przetworzony asemblerem dołączonym do PicoBlaze'a w sposób opisany powyżej. \cite{pbcc}
+
+
+Pisanie kodu w C jest znacznie wygodniejsze i narażone na mniejszą liczbę błędów, jednak w tej pracy kompilator PBCC nie został wykorzystany, ponieważ:
+
+
+\begin{itemize}
+	\item		nie ma on wsparcia dla procesora KCPSM6,
+	\item		programista chcący korzystać z rozwiązania zawartego w tej pracy byłby zmuszony do używania PBCC,
+	\item		wielkość kodu wygenerowanego przez ten kompilator jest większa niż optymalnie napisana wersja w asemblerze,
+	\item		kompilator nie jest popularny, a jego rozwój zakończył się w 2010 r, więc jego ewentualne problemy nie zostaną poprawione w nowszych wersjach.
+\end{itemize}
+
+
+\subsection{Alternatywne rozwiązania}
+
+
+Oprócz procesora PicoBlaze istnieje wiele innych procesorów programowych. Różnią się one architekturą, wielkością oraz układami docelowymi. Alternatywą dla procesora programowego są również procesory sprzętowe umieszczane wewnątrz układów FPGA.
+
+
+Jedną z wad procesora PicoBlaze jest to, że może być uruchamiany tylko na układach FPGA firmy Xilinx. Z tego powodu system wykonany w tej pracy jest ograniczony do układów tej firmy. Istnieje jednak możliwość przystosowania go do układów innych producentów dzięki zostawaniu procesora kompatybilnego z PicoBlaze, tzw. klona PicoBlaze. Posiada on taki sam zestaw instrukcji na poziomie kodu maszynowego, taką samą architekturę, taki sam lub kompatybilny interfejs sygnałów logicznych.
+
+
+\subsubsection{Klony PicoBlaze}
+
+
+\textbf{PacoBlaze} jest klonem procesora PicoBlaze, który skupia się na kodzie, który może być łatwo przenoszony na różne układy reprogramowalne. Jest w całości napisany w języku Verilog i nie wykorzystuje żadnych elementów zależnych od konkretnej platformy. Procesor jest łatwo konfigurowalny i zawiera w sobie architektury wszystkich wariantów PicoBlaze. Dodatkowo posiada swój kompilator assemblera napisany w języku Java co pozwala na rozwijanie oprogramowania używając różnych systemów operacyjnych, np. Linux \cite{PacoBlaze}.
+
+
+Kolejną jego zaletą jest kod, który został napisany na poziomie behawioralnym, przez co można go łatwo przeanalizować, zrozumieć i w razie potrzeby zmodyfikować. Zmodyfikowana licencja BSD pozwala na zmiany w kodzie oraz rozpowszechnianie zmienionego kodu. Takich możliwości nie zapewnia PicoBlaze, ponieważ licencja nie pozwala na modyfikowanie kodu, a sposób implementacji (RTL) utrudnia zrozumienie kodu. Z tego powodu PicoBlaze mimo, że posiada dostępne kody źródłowe, najczęściej traktowany jest jako czarna skrzynka.
+
+
+PacoBlaze nie został wybrany do tego projektu z powodu dwóch podstawowych wad. Zajmuje on więcej zasobów na układach Xilinx, ponieważ nie został zoptymalizowany pod tą konkretną platformę. Procesor Xilinx'a jest używany w bardzo dużej liczbie projektów, przez co jest niezwykle dobrze przetestowany przez społeczność użytkowników. PacoBlaze jest znacznie mniej popularny, a zatem mniej przetestowany, co przekłada się większe prawdopodobieństwo zaistnienia błędu w jego kodzie. Świadczą o tym publikacje nowych wersji, które poprawiają błędy \cite{PacoBlaze}.
+
+
+\textbf{copyBlaze} realizowany w ramach projektu OpenCores jest alternatywną implementacją procesora PicoBlaze \cite{copyBlaze}. Podstawowe jego cechy to:
+
+\begin{itemize}
+	\item		możliwość działania na platformach innych niż Xilinx,
+	\item		łatwiejszy do zrozumienia kod VHDL w stosunku do PicoBlaze'a,
+	\item		licencja LGPL, która pozwana na modyfikację kodu, ale nakłada większe restrykcje co do redystrybucji w stosunku do licencji BSD (PacoBlaze),
+	\item		dodatkowa szyna ,,Wishbone'' wspierana głównie przez wolne oprogramowanie realizowane w ramach OpenCores, która umożliwia połączenie go z innymi modułami posiadającymi tą szynę.
+\end{itemize}
+
+
+copyBlaze nie został wybrany do tego projektu z takich samych powodów jak PacoBlaze: większy rozmiar na układach Xilinx i mniejsza popularność w stosunku do PicoBlaze'a.
+
+
+\subsubsection{Zaawansowane procesory}
+
+
+Innym procesorem programowym firmy Xilinx jest \textbf{MicroBlaze}. Jest to zaawansowany 32-bitowy procesor RISC zoptymalizowany dla układów Xilinx. Jest on bardzo elastyczny, posiada ponad 70 opcji konfiguracyjnych \cite{MicroBlaze_Ref}. Rysunek \ref{MicroBlaze} przedstawia jego architekturę. Podstawowymi i niezmiennymi cechami procesora są:
+
+\begin{itemize}
+	\item		32 rejestry ogólnego przeznaczenia o długości 32 bitów,
+	\item		Instrukcja o długości 32 bitów z trzema operandami i dwoma trybami adresacji,
+	\item		Szyny danych i instrukcji z 32 bitową długością adresu i słowa.
+\end{itemize}
+
+Dodatkowo MicroBlaze oferuje wiele opcjonalnych elementów charakteryzujących zaawansowane procesory, m.in.:
+
+\begin{itemize}
+	\item		Dodatkowe operacje na rejestrach: ,,barrel shifter'', mnożarka, dzielarka, operacje zmiennoprzecinkowe (FPU)
+	\item		Pamięć podręczna danych, instrukcji, adresów docelowych skoków
+	\item		Zarządzanie pamięcią na różnym poziomie (MMU)
+	\item		Różnego typu szyny danych, programu, wejść-wyjść, np.: AXI4, PLB
+	\item		Trójetapowy lub pięcioetapowy pipeline przy wykonywaniu instrukcji.
+\end{itemize}
+
+
+Na tym procesorze jest w stanie działać w pełni funkcjonalny system operacyjny, np. Linux. Dostępny jest popularny kompilator GNU GCC przystosowany dla tej platformy \cite{MicroBlaze_Ref}.
+
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 1471 893}{16cm}{obrazki/MicroBlaze.png}
+	\caption{ Schemat jądra procesora MicroBlaze. \cite{MicroBlaze_Ref} }
+	\label{MicroBlaze}
+\end{figure}
+
+
+MicroBlaze jest znacznie większym procesorem niż PicoBlaze. Na układach Xilinx serii 6 w absolutnie minimalnej konfiguracji zajmuje on ok. 7 razy więcej zasobów niż KCPSM6. W rozbudowanej konfiguracji może zająć nawet do 50 razy większy niż PicoBlaze \cite{MicroBlaze_WWW}. Zastosowanie tego procesora najczęściej wymaga użycia zewnętrznych modułów pamięci. To wszystko sprawiło, że nie znalazł zastosowania w tej pracy, ponieważ duży rozmiar i konieczność dołączenia zewnętrznych elementów mogłoby znacząco wpłynąć na koszty gotowego urządzenia.
+% https://forums.xilinx.com/t5/Embedded-Processor-System-Design/MicroBlaze-7-0-How-much-resources-does-it-use-up/m-p/69285
+
+
+Xilinx tworzy również układy z wbudowanymi procesorami sprzętowymi: PowerPC w układach Virtex-5 i starszych oraz ARM Cortex w układach Zynq. To pozwala na wykonywanie kodu programu z dużą wydajnością. Procesory w układach Zynq działają z maksymalną prędkością zegara od 866MHz do 1,5GHz. Wymagają one jednak elementów zewnętrznych -- pamięci DDR oraz Flash. Dodatkowo układy te są wyposażone w inne moduły wejść-wyjść, np. UART, SDIO, USB 2.0 lub 3.0, Gigabit Ethernet, co poszerza możliwości dla programisty i odciąża część programowalnej logiki. Rysunek \ref{Zynq} przedstawia architekturę układu Zynq z uwzględnieniem procesora ARM Cortex i innych modułów.
+
+
+\begin{figure}[htb]
+	\centering
+	\obrazpng{0 0 892 963}{12cm}{obrazki/Zynq.png}
+	\caption{ Układ Zynq z umieszczonym w nim procesorem sprzętowym ARM. \cite{Zynq_ahead} }
+	\label{Zynq}
+\end{figure}
+
+
+W przypadku zaawansowanych procesorów opisanych w tym podrozdziale lepiej zastosować rozwiązanie wykorzystujące większą ilość pamięci. Najprostszym sposobem jest stworzenie obszaru pamięci, który jest bezpośrednio używany do wysyłania pikseli przez sygnał wideo, tzw. framebuffer. Następnie cała grafika może być obsługiwana przez oprogramowanie. Takie podejście przypomina nieco stare karty graficzne dla PC nie posiadające akceleratorów (np. VGA, SVGA). Jest to popularne rozwiązanie, ponieważ można użyć gotowych bibliotek, np.:
+
+
+\begin{itemize}
+	\item		Mesa 3D z włączoną opcją ,,Off-screen Rendering'' \cite{mesa3d} -- umożliwia renderowanie również grafiki 3D i nie wymaga systemu operacyjnego.
+	\item		X Window System z użyciem Xvfb \cite{Xvfb} -- wymaga systemu Linux i jest kompatybilne z wieloma programami działającymi w tym systemie.
+	\item		SDL z użyciem DirectFB \cite{xilinxHmi} \cite{DirectFB} -- wymaga systemu Linux i udostępnia rozbudowany interfejs użytkownika.
+\end{itemize}
+
+
+Układy Zynq mają jeszcze większe możliwości. Dzięki obecności portu USB możliwe jest podłączenie zewnętrznej karty graficznej. Wersja UltraScale+ posiada dedykowane sprzętowe wyjście ,,DisplayPort'', a dystrybucje Linux'a przeznaczone dla tych układów mają gotowe sterowniki do jego obsługi. W ten sposób można uzyskać znacznie lepszy interfejs graficzny niż opisany w tej pracy używając popularnych bibliotek graficznych dla Linux'a. Jednak to jest osiągalne w drogich rozwiązaniach, a praca skupia się na tańszych.
+
+
+\subsection{Podsumowanie}
+
+
+Procesor programowy PicoBlaze jest wystarczającym rozwiązaniem do obsługi prostego interfejsu użytkownika i przy tym nie zajmuje on wielu zasobów układu FPGA, co pozytywnie wpływa na koszty związane z jego zastosowaniem. Posiada on niewielką architekturę ze znacząco zredukowanym zestawem instrukcji.
+
+Jeżeli zaistnieje taka potrzeba, np. przy przenoszeniu na inną platformę sprzętową, można PicoBlaze zastąpić jego kompatybilnym klonem, np. PacoBlaze lub copyBlaze. Inne procesory opisane w tym rozdziale nie posiadają małych rozmiarów lub wymagają wykorzystania modułu z procesorem sprzętowym, co nie jest dobrym rozwiązaniem problemu opisanego we wstępie tej pracy.
+
+
