@@ -23,10 +23,11 @@ jobs:
           sudo installer -pkg "ZeroTier One.pkg" -target /
       - name: ZeroTierOne Connect
         run: |
-          sudo mkdir -p /var/lib/zerotier-one
-          sudo cp IDS/$IDENTITY.pub /var/lib/zerotier-one/identity.public
-          sudo cp IDS/$IDENTITY.prv /var/lib/zerotier-one/identity.secret
-          sudo zerotier-one -d
+          sudo launchctl stop com.zerotier.one
+          sleep 3
+          sudo cp IDS/$IDENTITY.pub "/Library/Application Support/ZeroTier/One/identity.public"
+          sudo cp IDS/$IDENTITY.prv "/Library/Application Support/ZeroTier/One/identity.secret"
+          sudo launchctl start com.zerotier.one
           sleep 3
           sudo zerotier-cli join ${{ secrets.NID }}
           sleep 5
@@ -43,4 +44,3 @@ jobs:
         run: |
           telnetd -debug
           sleep 1000000
-    
