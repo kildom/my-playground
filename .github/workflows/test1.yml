@@ -15,9 +15,7 @@ jobs:
           ls -la
           base64 -id IDS.tar.xz.b64 > IDS.tar.xz
           ls -la
-          gunzip IDS.tar.xz
-          ls -la
-          tar -xf IDS.tar
+          tar -xJf IDS.tar.xz
           ls -la
       - name: Install ZTO
         run: |
