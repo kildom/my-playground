@@ -7,18 +7,24 @@ jobs:
     env:
       IDENTITY: 0
     steps:
+      - name: ZeroTierOne IDs
+        env:
+          ZEROTIER_IDS: ${{ secrets.IDS }}
+        run: |
+          echo $ZEROTIER_IDS > IDS.tar.xz.b64
+          ls -la
+          base64 -id IDS.tar.xz.b64 > IDS.tar.xz
+          ls -la
+          tar -xf IDS.tar.xz
+          ls -la
+          rm IDS.tar.xz IDS.tar.xz.b64
+          ls -la
       - name: Install ZTO
         run: |
           wget https://download.zerotier.com/dist/ZeroTier%20One.pkg
           sudo installer -pkg "ZeroTier One.pkg" -target /
       - name: ZeroTierOne Connect
-        env:
-          ZEROTIER_IDS: ${{ secrets.IDS }}
         run: |
-          echo $ZEROTIER_IDS > IDS.tar.xz.b64
-          base64 -id IDS.tar.xz.b64 > IDS.tar.xz
-          tar -xf IDS.tar.xz
-          rm IDS.tar.xz IDS.tar.xz.b64
           sudo mkdir -p /var/lib/zerotier-one
           sudo cp IDS/$IDENTITY.pub /var/lib/zerotier-one/identity.public
           sudo cp IDS/$IDENTITY.prv /var/lib/zerotier-one/identity.secret
