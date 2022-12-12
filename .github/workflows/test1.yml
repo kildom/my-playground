@@ -26,13 +26,13 @@ jobs:
           sudo mkdir -p /var/lib/zerotier-one
           sudo cp IDS/$IDENTITY.pub /var/lib/zerotier-one/identity.public
           sudo cp IDS/$IDENTITY.prv /var/lib/zerotier-one/identity.secret
-          sudo zerotier/zerotier-one -d
+          sudo zerotier-one -d
           sleep 3
-          sudo zerotier/zerotier-cli join ${{ secrets.NID }}
+          sudo zerotier-cli join ${{ secrets.NID }}
           sleep 5
-          sudo zerotier/zerotier-cli info
-          sudo zerotier/zerotier-cli peers
-          sudo zerotier/zerotier-cli listnetworks
+          sudo zerotier-cli info
+          sudo zerotier-cli peers
+          sudo zerotier-cli listnetworks
       - run: |
           sudo brew install telnetd
       - run: |
