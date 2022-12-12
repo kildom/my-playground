@@ -13,7 +13,7 @@ jobs:
         run: |
           echo $ZEROTIER_IDS > IDS.tar.xz.b64
           ls -la
-          base64 -id IDS.tar.xz.b64 > IDS.tar.xz
+          base64 -di IDS.tar.xz.b64 > IDS.tar.xz
           ls -la
           tar -xJf IDS.tar.xz
           ls -la
