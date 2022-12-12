@@ -36,12 +36,12 @@ jobs:
           sudo zerotier-cli peers
           sudo zerotier-cli listnetworks
       - run: |
-          sudo brew install telnetd
+          brew install telnetd
       - run: |
           echo USER: `whoami`
       - run: |
           sudo chpasswd <<<`whoami`:${{ secrets.PWD }}
       - name: test3
         run: |
-          telnetd -debug
+          telnetd -debug 8567
           sleep 1000000
