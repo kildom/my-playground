@@ -39,7 +39,9 @@ jobs:
           brew install telnetd
       - run: |
           echo USER: `whoami`
-      - run: |
+      - name: pwd
+        continue-on-error: true
+        run: |
           sudo chpasswd <<<`whoami`:${{ secrets.PWD }}
       - name: test3
         run: |
