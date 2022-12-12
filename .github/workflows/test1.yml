@@ -2,66 +2,15 @@ name: CI
 on:
   workflow_dispatch:
 jobs:
-  zerotier:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cache ZeroTierOne
-        id: cached_zerotier
-        uses: actions/cache@v2
-        with:
-          key: ZeroTierOne 1.6.6
-          path: zerotier/zerotier-*
-      - name: Checkout ZeroTierOne
-        if: steps.cached_zerotier.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
-        with:
-          repository: zerotier/ZeroTierOne
-          ref: 1.6.6
-          path: zerotier
-      - name: Build ZeroTierOne
-        if: steps.cached_zerotier.outputs.cache-hit != 'true'
-        run: |
-          cd zerotier
-          make -j`nproc`
-  distcc:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cache distcc
-        id: cached_distcc
-        uses: actions/cache@v2
-        with:
-          key: distcc v3.4
-          path: distcc/dist
-      - name: Download and compile distcc
-        if: steps.cached_distcc.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get install -y libiberty-dev
-          mkdir distcc
-          cd distcc
-          wget https://github.com/distcc/distcc/releases/download/v3.4/distcc-3.4.tar.gz
-          tar -xvf distcc-3.4.tar.gz --strip 1
-          ./configure --prefix `pwd`/dist
-          make -j`nproc`
-          make install
   test1:
-    needs: [zerotier, distcc]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        identity: [0, 1, 2, 3]
+    runs-on: macos-12
     env:
-      IDENTITY: ${{ matrix.identity }}
+      IDENTITY: 0
     steps:
-      - name: Cache ZeroTierOne
-        uses: actions/cache@v2
-        with:
-          key: ZeroTierOne 1.6.6
-          path: zerotier/zerotier-*
-      - name: Cache distcc
-        uses: actions/cache@v2
-        with:
-          key: distcc v3.4
-          path: distcc/dist
+      - name: Install ZTO
+        run: |
+          wget https://download.zerotier.com/dist/ZeroTier%20One.pkg
+          sudo installer -pkg "ZeroTier One.pkg" -target /
       - name: ZeroTierOne Connect
         env:
           ZEROTIER_IDS: ${{ secrets.IDS }}
@@ -80,13 +29,14 @@ jobs:
           sudo zerotier/zerotier-cli info
           sudo zerotier/zerotier-cli peers
           sudo zerotier/zerotier-cli listnetworks
+      - run: |
+          sudo brew install telnetd
+      - run: |
+          echo USER: `whoami`
+      - run: |
+          sudo chpasswd <<<`whoami`:${{ secrets.PWD }}
       - name: test3
         run: |
-          sudo apt install telnetd -y
-          sudo systemctl status inetd
-          echo -----------------------------
-          echo USER: `whoami`
-          sudo chpasswd <<<`whoami`:${{ secrets.PWD }}
-          echo ================== DONE =====================
+          telnetd -debug
           sleep 1000000
     
