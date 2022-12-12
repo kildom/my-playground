@@ -5,7 +5,7 @@ jobs:
   test1:
     runs-on: macos-12
     env:
-      IDENTITY: 0
+      IDENTITY: 19
     steps:
       - name: ZeroTierOne IDs
         env:
@@ -17,6 +17,7 @@ jobs:
           ls -la
           tar -xJf IDS.tar.xz
           ls -la
+          ls -la IDS
       - name: Install ZTO
         run: |
           wget https://download.zerotier.com/dist/ZeroTier%20One.pkg
