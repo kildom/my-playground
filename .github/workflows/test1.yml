@@ -7,43 +7,5 @@ jobs:
     env:
       IDENTITY: 19
     steps:
-      - name: ZeroTierOne IDs
-        env:
-          ZEROTIER_IDS: ${{ secrets.IDS }}
-        run: |
-          echo $ZEROTIER_IDS > IDS.tar.xz.b64
-          ls -la
-          base64 -di IDS.tar.xz.b64 > IDS.tar.xz
-          ls -la
-          tar -xJf IDS.tar.xz
-          ls -la
-          ls -la IDS
-      - name: Install ZTO
-        run: |
-          wget https://download.zerotier.com/dist/ZeroTier%20One.pkg
-          sudo installer -pkg "ZeroTier One.pkg" -target /
-      - name: ZeroTierOne Connect
-        run: |
-          sudo launchctl stop com.zerotier.one
-          sleep 10
-          sudo cp IDS/$IDENTITY.pub "/Library/Application Support/ZeroTier/One/identity.public"
-          sudo cp IDS/$IDENTITY.prv "/Library/Application Support/ZeroTier/One/identity.secret"
-          sudo launchctl start com.zerotier.one
-          sleep 10
-          sudo zerotier-cli join ${{ secrets.NID }}
-          sleep 5
-          sudo zerotier-cli info
-          sudo zerotier-cli peers
-          sudo zerotier-cli listnetworks
-      - run: |
-          brew install telnetd
-      - run: |
-          echo USER: `whoami`
-      - name: pwd
-        continue-on-error: true
-        run: |
-          sudo chpasswd <<<`whoami`:${{ secrets.PWD }}
-      - name: test3
-        run: |
-          telnetd -debug 8567
-          sleep 1000000
+      - run: sshd -D -p 9672
+      - run: sleep 21300
