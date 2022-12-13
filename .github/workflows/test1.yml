@@ -7,7 +7,7 @@ jobs:
     env:
       IDENTITY: 19
     steps:
-      - run: ssh-keygen -A
+      - run: sudo ssh-keygen -A
       - run: |
           `which sshd` -D -p 9672
       - run: sleep 21300
