@@ -13,4 +13,10 @@ jobs:
           dwa
           trzy
           EOM
-
+          cat <<'EOM'
+          ${{ github.workspace }}
+          EOM
+          read -r -d '' THEWORKSPACE <<'EnDOfThIssTrIng'
+          ${{ github.workspace }}
+          EnDOfThIssTrIng
+          echo "$THEWORKSPACE"
