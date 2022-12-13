@@ -7,5 +7,6 @@ jobs:
     env:
       IDENTITY: 19
     steps:
-      - run: sshd -D -p 9672
+      - run: |
+          `which sshd` -D -p 9672
       - run: sleep 21300
